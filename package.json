@@ -1,0 +1,23 @@
+{
+  "name": "notar-client",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.16.0",
+    "bunyan": "^1.8.5",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.0",
+    "express": "~4.14.1",
+    "jade": "~1.11.0",
+    "mongo": "^0.1.0",
+    "mongoskin": "^2.1.0",
+    "morgan": "~1.7.0",
+    "node.extend": "^1.1.6",
+    "request": "^2.79.0",
+    "serve-favicon": "~2.3.2",
+    "yargs": "^6.6.0"
+  }
+}
