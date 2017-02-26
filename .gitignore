@@ -2,3 +2,8 @@ idea
 *.log
 node_modules
 .idea
+*log[0-9]*
+log[0-9].txt
+tmp
+archive
+*.zip

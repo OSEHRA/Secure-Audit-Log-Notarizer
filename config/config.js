@@ -58,6 +58,11 @@ var config =
     port: 3000,
     app: "notar"
   },
+  zip:{
+    active:true,
+    dir: path.resolve(__dirname,'../archive'),
+    maxFileSize: 100000000
+  },
   https: {
     key: '',
     cert: '',
@@ -79,6 +84,7 @@ var config =
 };
 
 function init(overrides) {
+  config.zip.fileName = config.mongodb.clientdb+'-logs';
   config = extend(true, config, overrides);
   config.clientCert = fs.readFileSync(config.certs.clientCert);
   config.clientKey = fs.readFileSync(config.certs.clientKey);
