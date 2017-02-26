@@ -34,26 +34,38 @@ function init() {
   app.post('/notar/sign', function (req, res, next) {
     var hash = req.body.hash;
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    var id = req.body.id
+    var id = req.body.id;
+    var millis=new Date().valueOf();
     if (!hash) return res.status(400).send("/notar/sign: No hash element in post body");
     try {
-      coll.insertOne({ip: ip, itemid: id, hash: hash},// time: new Date(body.timestamp)},
+      coll.insertOne({ip: ip, itemid: id, hash: hash, time: millis},// time: new Date(body.timestamp)},
           function (err, wresult) {
             if (err) {
               log.error(err, "signing hash from %s", ip);
               return res.status(500).send("/notar/sign: Error inserting hash");
             }
-            res.send(JSON.stringify({signature: wresult.insertedId.toString()}));
+            res.send(JSON.stringify({time: millis, signature: wresult.insertedId.toString()}));
           })
     } catch (e){
       log.error(e, "writing db");
     }
   });
 
+  app.get('/notar/count', function(req, res, next){
+    var start=req.query.start,
+        end=req.query.end;
+    coll.count({$and : [{$gte:{time:start}}, {$lte:{time:end}}]}, function(err, count){
+      if (err){
+        log.error(err, "getting count");
+        return res.status(500).send("ERROR getting count.");
+      }
+      res.send(JSON.stringify({count:count}));
+    })
+  })
+
   app.post('/notar/validate', function (req, res, next) {
     var hash = req.body.hash,
         signature = req.body.signature,
-        timestamp = new Date(req.body.time),
         id = req.body.id
         ;
     coll.findOne({_id: mongoskin.ObjectId(signature)}, function (err, ob) {
@@ -75,6 +87,7 @@ function init() {
 
   app.use(function(req, res, next) {
     var err = new Error('Not Found');
+    log.error("Not found. url:%s, query:%j, body:%j", req.url, req.query, req.body);
     err.status = 404;
     next(err);
   });

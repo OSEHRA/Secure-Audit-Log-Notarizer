@@ -56,7 +56,7 @@ var config =
   notarizer:{
     host: "localhost",
     port: 3000,
-    app: "/notar"
+    app: "notar"
   },
   https: {
     key: '',
