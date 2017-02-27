@@ -176,7 +176,7 @@ function init() {
         }
         if (!ob) {
           log.error("No object for signature:%s", signature);
-          return res.send({invalid: true, reason: "no such signature"});
+          return invalid.push({invalid: true, reason: "no such signature"});
         }
         if (ob.hash == hash && ob.itemid == itemid) return setImmediate(doOne);
         // errors
