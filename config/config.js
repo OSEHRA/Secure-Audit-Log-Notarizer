@@ -87,19 +87,20 @@ var config =
 function init(overrides) {
   config.zip.fileName = config.mongodb.clientdb+'-logs';
   config = extend(true, config, overrides);
-  config.clientCert = fs.readFileSync(config.certs.clientCert);
-  config.clientKey = fs.readFileSync(config.certs.clientKey);
-  config.serverCert = fs.readFileSync(config.certs.serverCert);
-  config.serverKey = fs.readFileSync(config.certs.serverKey);
+  if (config.ssl) {
+    config.clientCert = fs.readFileSync(config.certs.clientCert);
+    config.clientKey = fs.readFileSync(config.certs.clientKey);
+    config.serverCert = fs.readFileSync(config.certs.serverCert);
+    config.serverKey = fs.readFileSync(config.certs.serverKey);
 
-  config.caCert = fs.readFileSync(config.certs.caCert);
-  // config.https.key = config.serverKey;
-  // config.https.cert = config.serverCert;
-  // config.https.ca = config.caCert;
-  config.requestOpts.cert = config.clientCert;
-  config.requestOpts.key = config.clientKey;
-  config.requestOpts.ca = config.caCert;
-
+    config.caCert = fs.readFileSync(config.certs.caCert);
+    // config.https.key = config.serverKey;
+    // config.https.cert = config.serverCert;
+    // config.https.ca = config.caCert;
+    config.requestOpts.cert = config.clientCert;
+    config.requestOpts.key = config.clientKey;
+    config.requestOpts.ca = config.caCert;
+  }
   return config;
 }
 
