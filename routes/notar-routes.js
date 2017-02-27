@@ -29,11 +29,9 @@ var calls = {
 var coll; // db collection
 
 function init() {
-
   app.get('/notar/help', function (req, res, next) {
     res.send(JSON.stringify(util.format(calls)));
   })
-
 
   app.post('/notar/sign', function (req, res, next) {
         var hash = req.body.hash;
@@ -46,7 +44,10 @@ function init() {
         zipin.loadAsync(zipped)
             .then(function (z) {
               saveIt(z)
-            });
+            })
+            .catch(function(err){
+              log.error(err, "loadasync zipped failed")
+            })
 
 
         function saveIt(z) {
@@ -100,7 +101,7 @@ function init() {
                       .then(function (newzip) {
                         zipIt(newzip);
                       })
-                      .catch(function(err){
+                      .catch(function (err) {
                         log.error(err, "Adding new file to zip");
                         // return to client
                         signIt();
@@ -128,9 +129,12 @@ function init() {
       }
   );
 
+  var numberValidated=0;
   // # count
   // Return count between dates and total in notarization collection
   app.get('/notar/count', function (req, res, next) {
+    // this is the first step in validation.
+    numberValidated=0;
     var start = parseInt(req.query.start),
         end = parseInt(req.query.end);
     coll.count({}, function (err, total) {
@@ -139,7 +143,7 @@ function init() {
         return res.status(500).send("ERROR getting count.");
       }
 
-      coll.count({$and: [{time: {$gte: start}}, {time :{$lte: end}}]}, function (err, count) {
+      coll.count({$and: [{time: {$gte: start}}, {time: {$lte: end}}]}, function (err, count) {
         if (err) {
           log.error(err, "getting count");
           return res.status(500).send("ERROR getting count.");
@@ -150,26 +154,45 @@ function init() {
   })
 
   app.post('/notar/validate', function (req, res, next) {
-    var hash = req.body.hash,
-        signature = req.body.signature,
-        id = req.body.id
-        ;
-    coll.findOne({_id: mongoskin.ObjectId(signature)}, function (err, ob) {
-      if (err) {
-        log.error(err, "/notar/validate from ip:%s for signature:%s", ip, signature);
-        return res.status(500).send("error finding signature")
+    var arr = req.body;
+    numberValidated+=arr.length;
+    var invalid = [];
+    doOne();
+    function doOne() {
+      if (!arr || !arr.length) {
+        log.info("cumulative number validated: %d", numberValidated);
+        if (invalid.length) {
+          return res.send(JSON.stringify({failed: invalid}))
+        } else {
+          return res.send({valid: config.notarizer.ok, numberValidated:numberValidated});
+        }
       }
-      if (!ob) {
-        log.error("No object for signature:%s", signature);
-        return res.send({invalid: true, reason: "no such signature"});
-      }
-      if (ob.hash == hash && ob.itemid == id) return res.send('OK');
-      //else
-      coll.update({_id: mongoskin.ObjectId(signature)}, {'$set': {invalid: true}});
-      return res.send(JSON.stringify(
-          {invalid: true, reason: (ob.hash != hash ? "hash " : "id ") + "does not match"}))
-    })
-  });
+      var item = arr.shift();
+      var signature = item.signature, itemid=item.itemid, hash = item.hash;
+      coll.findOne({_id: mongoskin.ObjectId(signature)}, function (err, ob) {
+        if (err) {
+          log.error(err, "finding doc with signature: %s", signature);
+          return res.status(500).send("processing error. Please check notarizer db and retry.");
+        }
+        if (!ob) {
+          log.error("No object for signature:%s", signature);
+          return res.send({invalid: true, reason: "no such signature"});
+        }
+        if (ob.hash == hash && ob.itemid==itemid) return setImmediate(doOne);
+        // errors
+        if (ob.hash != hash) invalid.push({invalid: true, reason: "hash does not match", itemid: itemid})
+        else if (ob.itemid != itemid) invalid.push({invalid: true, reason: "log item id does not match", itemid: itemid})
+        //else
+        coll.update({_id: mongoskin.ObjectId(signature)}, {$set: {invalid: true}})
+            .then(function (up) {
+              setImmediate(doOne);
+            })
+            .catch(function (err) {
+              log.error(err, "updating invalid id")
+            })
+      })
+    }
+  })
 
   app.use(function (req, res, next) {
     var err = new Error('Not Found');
@@ -186,7 +209,7 @@ if (require.main == module) {
   if (argv.level) log.level(argv.level);
   if (argv.serverdb) config.mongodb.serverdb = argv.serverdb;
   if (argv.ssl) config.ssl = true;
-  if (argv.port) config.port= argv.port;
+  if (argv.port) config.port = argv.port;
   options = extend({}, config.requestOpts);
   options.url = config.notarizer.url;
   options.json = true;

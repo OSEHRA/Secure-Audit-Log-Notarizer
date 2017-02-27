@@ -56,7 +56,8 @@ var config =
   notarizer:{
     host: "localhost",
     port: 3000,
-    app: "notar"
+    app: "notar",
+    ok: "VALID Group"
   },
   zip:{
     active:true,
