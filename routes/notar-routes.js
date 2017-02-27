@@ -45,7 +45,7 @@ function init() {
             .then(function (z) {
               saveIt(z)
             })
-            .catch(function(err){
+            .catch(function (err) {
               log.error(err, "loadasync zipped failed")
             })
 
@@ -129,12 +129,12 @@ function init() {
       }
   );
 
-  var numberValidated=0;
+  var numberValidated = 0;
   // # count
   // Return count between dates and total in notarization collection
   app.get('/notar/count', function (req, res, next) {
     // this is the first step in validation.
-    numberValidated=0;
+    numberValidated = 0;
     var start = parseInt(req.query.start),
         end = parseInt(req.query.end);
     coll.count({}, function (err, total) {
@@ -155,7 +155,7 @@ function init() {
 
   app.post('/notar/validate', function (req, res, next) {
     var arr = req.body;
-    numberValidated+=arr.length;
+    numberValidated += arr.length;
     var invalid = [];
     doOne();
     function doOne() {
@@ -164,11 +164,11 @@ function init() {
         if (invalid.length) {
           return res.send(JSON.stringify({failed: invalid}))
         } else {
-          return res.send({valid: config.notarizer.ok, numberValidated:numberValidated});
+          return res.send({valid: config.notarizer.ok, numberValidated: numberValidated});
         }
       }
       var item = arr.shift();
-      var signature = item.signature, itemid=item.itemid, hash = item.hash;
+      var signature = item.signature, itemid = item.itemid, hash = item.hash;
       coll.findOne({_id: mongoskin.ObjectId(signature)}, function (err, ob) {
         if (err) {
           log.error(err, "finding doc with signature: %s", signature);
@@ -178,17 +178,18 @@ function init() {
           log.error("No object for signature:%s", signature);
           return res.send({invalid: true, reason: "no such signature"});
         }
-        if (ob.hash == hash && ob.itemid==itemid) return setImmediate(doOne);
+        if (ob.hash == hash && ob.itemid == itemid) return setImmediate(doOne);
         // errors
         if (ob.hash != hash) invalid.push({invalid: true, reason: "hash does not match", itemid: itemid})
-        else if (ob.itemid != itemid) invalid.push({invalid: true, reason: "log item id does not match", itemid: itemid})
+        else if (ob.itemid != itemid) invalid.push(
+            {invalid: true, reason: "log item id does not match", itemid: itemid})
         //else
-        coll.update({_id: mongoskin.ObjectId(signature)}, {$set: {invalid: true}})
-            .then(function (up) {
+        coll.update({_id: mongoskin.ObjectId(signature)}, {$set: {invalid: true}},
+            function (err, up) {
+              if (err) {
+                log.error(err, "updating invalid id")
+              }
               setImmediate(doOne);
-            })
-            .catch(function (err) {
-              log.error(err, "updating invalid id")
             })
       })
     }
