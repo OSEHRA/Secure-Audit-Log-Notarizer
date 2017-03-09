@@ -1,5 +1,4 @@
-Secure-Audit-Log-Notarizer
-==========================
+# Secure-Audit-Log-Notarizer
 
 _Audit log protection mechanism for popHealth certification - d(3) criteria_
 
@@ -7,8 +6,7 @@ This module is designed to reveal tampering in database entries. It was designed
 
 The idea is that after a break-in to the host computer, or any suspicious action in the database, we need to check to see if information has been tampered with.
 
-Architecture
-------------
+## Architecture
 
 The server component, ````routes/notar-routes.js```` uses ````app.js```` to offer itself as a web service. 
 
@@ -18,8 +16,7 @@ When it is time to check an entry, the client goes through its secured collectio
 
 Optionally, the client can also send a ZIP of each item to the server and the server will put those into a big zip file, starting a new zip file when the configured size limit is reached.
 
-Installation
-------------
+## Installation
 
 After cloning from Github, cd into the app directory and run:
 
@@ -29,8 +26,7 @@ If you want to run the server and/or client as a daemon (recommended), also inst
 
     ````npm install -g forever````
 
-Usage
------
+## Usage
 
 For development, server and client can be run on the same host. In production, it is essential that tqhe server runs on another host in the LAN. An SSL option is provided for that purpose.
 
@@ -59,8 +55,7 @@ To run validation of the notarizer database collection entries:
 
 ````node lib/client.js --validate [ OPTIONAL_ARGS ]````
 
-Configuration
--------------
+## Configuration
 
 There is a number of configuration options in config/config.js. These can be modified to tailor the application to your environment and to avoid the need for any command-line arguments.
 
@@ -104,6 +99,4 @@ To Do
 =====
 
 This is not currently an npm module. That will probably not be done since the application is currently focussed on PopHealth.
-
-
 
