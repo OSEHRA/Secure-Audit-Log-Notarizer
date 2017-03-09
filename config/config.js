@@ -56,9 +56,6 @@ var config =
   routes: {
   },
   requestOpts:{
-    key:null,
-    cert:null,
-    ca:null,
     passphrase:''
   },
   sha2: function(txt){
