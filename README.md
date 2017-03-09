@@ -65,7 +65,9 @@ There are a number of configuration options in config/config.js. These can be mo
 ### Config items
 
 * MongoDB authentication. If your MongoDB runs with --auth, you must create a credentials.js file in the config/ directory:
+
     ````echo 'module.exports="USER:PASSWORD@"' > config/credentials.js````
+
     If your MongoDB installation runs without authentication, then comment out the ````require('./credentials')```` line and remove ````'+cred+'```` from the mongodb.urlskel entry in config.js
 
 * certs: if running under SSL, you must supply (PEM) certificates and keys here. They may be self-signed (caCert helps with this). 
