@@ -1,5 +1,7 @@
-Secure Audit Log Notarizer
+Secure-Audit-Log-Notarizer
 ==========================
+
+_Audit log protection mechanism for popHealth certification - d(3) criteria_
 
 This module is designed to reveal tampering in database entries. It was designed to accompany PopHealth to protect its audit log.
 
