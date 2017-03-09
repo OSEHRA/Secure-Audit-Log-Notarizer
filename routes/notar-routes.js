@@ -211,10 +211,6 @@ if (require.main == module) {
   if (argv.serverdb) config.mongodb.serverdb = argv.serverdb;
   if (argv.ssl) config.ssl = true;
   if (argv.port) config.port = argv.port;
-  options = extend({}, config.requestOpts);
-  options.url = config.notarizer.url;
-  options.json = true;
-  options.jar = true;
 
   var db;
   try {

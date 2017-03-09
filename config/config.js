@@ -28,15 +28,6 @@ var config =
     serverCert: path.resolve(certPath, 'server.pem'),
     caCert: path.resolve(certPath, 'ca.pem')
   },
-  restart: {
-    timeout: 15000,
-    limit: 10
-  },
-  binDir: '/home/zato/bin',
-  log: {
-    file: 'client.log',
-    level: 'INFO'
-  },
   ssl: false,
   port: 3000,
   mongodb: {
@@ -47,12 +38,6 @@ var config =
     nota: 'nota',
     since: new Date("2015-01-01")
   },
-  providers: [
-    'localhost:3000'
-  ],
-  serverCert: '',
-  serverKey: '',
-  caCert: '',
   notarizer:{
     host: "localhost",
     port: 3000,
@@ -65,9 +50,6 @@ var config =
     maxFileSize: 100000000
   },
   https: {
-    key: '',
-    cert: '',
-    ca: '',
     requestCert: true,
     rejectUnauthorized: false
   },
@@ -94,9 +76,9 @@ function init(overrides) {
     config.serverKey = fs.readFileSync(config.certs.serverKey);
 
     config.caCert = fs.readFileSync(config.certs.caCert);
-    // config.https.key = config.serverKey;
-    // config.https.cert = config.serverCert;
-    // config.https.ca = config.caCert;
+    config.https.key = config.serverKey;
+    config.https.cert = config.serverCert;
+    config.https.ca = config.caCert;
     config.requestOpts.cert = config.clientCert;
     config.requestOpts.key = config.clientKey;
     config.requestOpts.ca = config.caCert;
